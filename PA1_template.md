@@ -8,32 +8,47 @@ output:
 
 ## Loading and preprocessing the data
 * Load the data
-```{r echo=TRUE}
+
+```r
 activities <- read.csv(unz("activity.zip","activity.csv"))
 ```
 
 * Process/transform the data into a format suitable for your anlysis
-```{r echo=TRUE}
+
+```r
 stepsPerDay <- aggregate(steps~date,data=activities,sum,na.rm=TRUE)
 ```
 
 ## What is mean and median of the total number of steps taken per day?
 
 * Make a histogram of the total numer of steps taken each day
-```{r "Total steps per day", echo=TRUE }
+
+```r
 hist(stepsPerDay$steps,xlab = "Total steps")
 ```
+
+![plot of chunk Total steps per day](figure/Total steps per day-1.png) 
 
 * Calculate the mean and median total number of steps taken per daay
 
 **mean**
-```{r echo=TRUE}
+
+```r
 mean(stepsPerDay$steps)
 ```
 
+```
+## [1] 10766.19
+```
+
 **median**
-```{r echo=TRUE}
+
+```r
 median(stepsPerDay$steps)
+```
+
+```
+## [1] 10765
 ```
 
 What is the average daily activity pattern?
@@ -41,16 +56,24 @@ What is the average daily activity pattern?
 
 1 Make a time series plot (i.e. type = "l") of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all days (y-axis)
 
-```{r "average steps per day", echo=TRUE}
+
+```r
 stepAvg <- aggregate(steps~interval,data=activities,mean,na.rm=TRUE)
 plot(steps~interval,data=stepAvg,type="l")
 ```
 
+![plot of chunk average steps per day](figure/average steps per day-1.png) 
+
 2 Which 5-minute interval, on average across all the days in the dataset, contains the maximum number of steps?
 
 The interval with the maximum number of steps is:
-```{r}
+
+```r
 stepAvg[which.max(stepAvg$steps),]$interval
+```
+
+```
+## [1] 835
 ```
 
 
@@ -60,8 +83,13 @@ Imputing missing values
 1 Calculate and report the total number of missing values in the dataset (i.e. the total number of rows with NAs)
 
 Missing total number of rows including NA values is:
-```{r echo=TRUE}
+
+```r
 sum(is.na(activities$steps))
+```
+
+```
+## [1] 2304
 ```
 
 
@@ -73,13 +101,15 @@ sum(is.na(activities$steps))
 3 Create a new dataset that is equal to the original dataset but with the missing data filled in.
 
 
-```{r}
+
+```r
 activities_filled <- merge(activities, stepAvg, by="interval")
 
 activities_filled$steps.x[is.na(activities_filled$steps.x)] = activities_filled$steps.y[is.na(activities_filled$steps.x)]
 ```
 
-```{r}
+
+```r
 stepsPerDayFilled <- aggregate(steps.x~date,activities_filled,sum)
 ```
 
@@ -89,19 +119,32 @@ What is the impact of imputing missing data on the estimates of the total daily 
 
 **Histogram**
 
-```{r "steps per day no-na"}
+
+```r
 hist(stepsPerDayFilled$steps.x, xlab="Total steps")
 ```
 
+![plot of chunk steps per day no-na](figure/steps per day no-na-1.png) 
+
 
 **mean**
-```{r}
+
+```r
 mean(stepsPerDayFilled$steps.x, na.rm=TRUE)
 ```
 
+```
+## [1] 10766.19
+```
+
 **median**
-```{r}
+
+```r
 median(stepsPerDayFilled$steps.x, na.rm=TRUE)
+```
+
+```
+## [1] 10766.19
 ```
 
 Differences:
@@ -119,7 +162,8 @@ Are there differences in activity patterns between weekdays and weekends?
 -------------------------------------------------------------------------
 
 1 Create a new factor variable in the dataset with two levels – “weekday” and “weekend” indicating whether a given date is a weekday or weekend day.
-```{r echo=TRUE}
+
+```r
 activities_filled$day_type <- as.POSIXlt(activities_filled$date)$wday
 activities_filled$day_type[activities_filled$day_type %in% c(0, 6) ] <- "weekend"
 activities_filled$day_type[activities_filled$day_type %in% c(1:5) ]  <- "weekday"
@@ -128,16 +172,20 @@ activities_filled$day_type[activities_filled$day_type %in% c(1:5) ]  <- "weekday
 
 Now calculate the average steps for weekday and for weekend:
 
-```{r}
+
+```r
 stepAvgWeekday =  tapply(subset(activities_filled, day_type=="weekday")$steps.x, subset(activities_filled, day_type=="weekday")$interval, mean)
 stepAvgWeekend =  tapply(subset(activities_filled, day_type=="weekend")$steps.x, subset(activities_filled, day_type=="weekend")$interval, mean)
 ```
 
 2) Panel Plot
 
-```{r "steps per day-type"}
+
+```r
 par(mfrow = c(2, 1))
 plot(stepAvgWeekday, type="l", xlab="interval", ylab="Number of steps", main="weekdays")
 plot(stepAvgWeekend, type="l", xlab="interval", ylab="Number of steps", main="weekend")
 ```
+
+![plot of chunk steps per day-type](figure/steps per day-type-1.png) 
 
